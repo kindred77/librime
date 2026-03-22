@@ -187,8 +187,9 @@ if(BUILD_SHARED_LIBS)
     endif()
   endif()
 else()
+#  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
   add_library(rime-static STATIC ${rime_src})
-  target_link_libraries(rime-static PRIVATE ${rime_deps})
+  target_link_libraries(rime-static ${rime_deps})
   print_target_link_libraries(rime-static)
   set_target_properties(rime-static PROPERTIES
           OUTPUT_NAME "rime" PREFIX "lib"
