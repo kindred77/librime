@@ -14,22 +14,18 @@ target_link_libraries(rime_api_console ${rime_console_deps})
 set(rime_console_src "rime_console.cc")
 add_executable(rime_console ${rime_console_src})
 target_compile_definitions(rime_console PRIVATE RIME_IMPORTS)
-target_link_libraries(rime_console ${rime_console_deps})
+target_link_libraries(rime_console rime)
 
 set(rime_deployer_src "rime_deployer.cc")
 add_executable(rime_deployer ${rime_deployer_src})
 target_compile_definitions(rime_deployer PRIVATE RIME_IMPORTS)
 target_link_libraries(rime_deployer
-  ${rime_library}
-  ${rime_dict_library}
-  ${rime_levers_library})
+  rime)
 
 set(rime_dict_manager_src "rime_dict_manager.cc")
 add_executable(rime_dict_manager ${rime_dict_manager_src})
 target_link_libraries(rime_dict_manager
-  ${rime_library}
-  ${rime_dict_library}
-  ${rime_levers_library})
+  rime)
 
 set(rime_patch_src "rime_patch.cc")
 add_executable(rime_patch ${rime_patch_src})
