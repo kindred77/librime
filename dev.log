@@ -1,0 +1,8 @@
+vcpkg install glog --triplet=x64-mingw-static
+vcpkg install leveldb --triplet=x64-mingw-static
+vcpkg install yaml-cpp --triplet=x64-mingw-static
+vcpkg install googletest --triplet=x64-mingw-static
+vcpkg install marisa-trie --triplet=x64-mingw-static
+vcpkg install OpenCC --triplet=x64-mingw-static # should use version 1.2.0, and disable the enable-cpp17.patch.
+
+cmake -G "Ninja" -DCMAKE_TOOLCHAIN_FILE=c:/mywork/projects/cpp/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-mingw-static -DCMAKE_INSTALL_PREFIX=c:/mywork/projects/cpp/librime/install -DBUILD_TEST=OFF -DBUILD_SHARED_LIBS=OFF -DBUILD_STATIC=ON -DENABLE_LOGGING=FALSE ..

@@ -68,6 +68,7 @@ else()
   find_package(Boost 1.77.0)
 endif()
 if(Boost_FOUND)
+  message(STATUS "Found boost: ${Boost_INCLUDE_DIRS}, ${Boost_LIBRARY_DIRS}")
   include_directories(${Boost_INCLUDE_DIRS})
   link_directories(${Boost_LIBRARY_DIRS})
   add_definitions(-DBOOST_DLL_USE_STD_FS)
@@ -83,6 +84,7 @@ if(ENABLE_LOGGING)
   find_package(Glog REQUIRED)
   if(Glog_FOUND)
     include_directories(${Glog_INCLUDE_PATH})
+    set(Glog_LIBRARY Glog)
     if(WIN32)
       add_compile_definitions("GLOG_DEPRECATED=__declspec(deprecated)")
       add_compile_definitions(GLOG_NO_ABBREVIATED_SEVERITIES)
@@ -101,7 +103,7 @@ if(ENABLE_LOGGING)
   set(RIME_ENABLE_LOGGING 1)
 
   if (ALSO_LOG_TO_STDERR)
-     set(RIME_ALSO_LOG_TO_STDERR 1)
+    set(RIME_ALSO_LOG_TO_STDERR 1)
   endif()
 endif()
 
@@ -123,9 +125,11 @@ if(BUILD_TEST)
   endif()
 endif()
 
-find_package(YamlCpp REQUIRED)
-if(YamlCpp_FOUND)
-  include_directories(${YamlCpp_INCLUDE_PATH})
+find_package(yaml-cpp REQUIRED)
+if(yaml-cpp_FOUND)
+  set(YamlCpp_LIBRARY yaml-cpp)
+  message(STATUS "Found yaml-cpp: ${yaml_cpp_INCLUDE_PATH}")
+  include_directories(${yaml-cpp_INCLUDE_PATH})
 endif()
 if(YamlCpp_STATIC)
   add_definitions(-DYAML_CPP_STATIC_DEFINE)
@@ -133,17 +137,29 @@ endif()
 
 find_package(LevelDb REQUIRED)
 if(LevelDb_FOUND)
-    include_directories(${LevelDb_INCLUDE_PATH})
+  set(LevelDb_LIBRARY LevelDb)
+  message(STATUS "Found leveldb: ${LevelDb_INCLUDE_PATH}")
+  include_directories(${LevelDb_INCLUDE_PATH})
 endif()
 
 find_package(Marisa REQUIRED)
 if(Marisa_FOUND)
+  set(Marisa_LIBRARY Marisa)
+  message(STATUS "Found Marisa: ${Marisa_INCLUDE_PATH}")
   include_directories(${Marisa_INCLUDE_PATH})
+endif()
+
+find_package(RapidJSON REQUIRED)
+if(RapidJSON_FOUND)
+  set(RapidJSON_LIBRARY rapidjson)
+  message(STATUS "Found RapidJSON: ${RapidJSON_LIBRARY}")
 endif()
 
 find_package(Opencc REQUIRED)
 if(Opencc_FOUND)
-include_directories(${Opencc_INCLUDE_PATH})
+  set(Opencc_LIBRARY Opencc)
+  message(STATUS "Found Opencc: ${Opencc_INCLUDE_PATH}")
+  include_directories(${Opencc_INCLUDE_PATH})
 endif()
 if(Opencc_STATIC)
   add_definitions(-DOpencc_BUILT_AS_STATIC)
@@ -158,8 +174,8 @@ else()
 endif()
 
 configure_file(
-  "${PROJECT_SOURCE_DIR}/src/rime/build_config.h.in"
-  "${PROJECT_BINARY_DIR}/src/rime/build_config.h")
+        "${PROJECT_SOURCE_DIR}/src/rime/build_config.h.in"
+        "${PROJECT_BINARY_DIR}/src/rime/build_config.h")
 
 include_directories(${PROJECT_BINARY_DIR}/src)
 include_directories(${PROJECT_SOURCE_DIR}/src)
@@ -191,21 +207,21 @@ endif()
 
 # keep these variables lest some Rime plugin's cmake file is still using them {
 if(NOT DEFINED LIB_INSTALL_DIR)
-    set(LIB_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR})
+  set(LIB_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR})
 endif()
 
 if(NOT DEFINED BIN_INSTALL_DIR)
-    set(BIN_INSTALL_DIR ${CMAKE_INSTALL_BINDIR})
+  set(BIN_INSTALL_DIR ${CMAKE_INSTALL_BINDIR})
 endif()
 # }
 
 # remove target
 configure_file(
-  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
-  IMMEDIATE @ONLY)
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+        IMMEDIATE @ONLY)
 add_custom_target(remove
-  COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+        COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux|FreeBSD|OpenBSD|DragonFly|GNU|Darwin" OR MINGW)
   set(prefix "${CMAKE_INSTALL_PREFIX}")
@@ -216,31 +232,31 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux|FreeBSD|OpenBSD|DragonFly|GNU|Darwin" OR 
   set(pluginsdir "${CMAKE_INSTALL_FULL_LIBDIR}/${RIME_PLUGINS_DIR}")
   set(includedir "${CMAKE_INSTALL_FULL_INCLUDEDIR}")
   configure_file(
-      ${PROJECT_SOURCE_DIR}/rime.pc.in
-      ${PROJECT_BINARY_DIR}/rime.pc
-      @ONLY)
+          ${PROJECT_SOURCE_DIR}/rime.pc.in
+          ${PROJECT_BINARY_DIR}/rime.pc
+          @ONLY)
   install(FILES ${PROJECT_BINARY_DIR}/rime.pc
-    DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}/pkgconfig)
+          DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}/pkgconfig)
 endif()
 
 install(FILES cmake/RimeConfig.cmake
-  DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/cmake/rime)
+        DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/cmake/rime)
 
 file(GLOB rime_public_header_files ${PROJECT_SOURCE_DIR}/src/*.h)
 list(FILTER rime_public_header_files EXCLUDE REGEX .*_impl\.h$)
 install(FILES ${rime_public_header_files}
-  DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR})
+        DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR})
 if(INSTALL_PRIVATE_HEADERS)
   file(GLOB rime_private_header_files
-    ${PROJECT_SOURCE_DIR}/src/rime/*.h
-    ${PROJECT_BINARY_DIR}/src/rime/*.h)
+          ${PROJECT_SOURCE_DIR}/src/rime/*.h
+          ${PROJECT_BINARY_DIR}/src/rime/*.h)
   install(FILES ${rime_private_header_files}
-    DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}/rime)
+          DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}/rime)
   foreach(rime_private_header_files_dir algo config dict gear lever)
     file(GLOB rime_private_header_files
-      ${PROJECT_SOURCE_DIR}/src/rime/${rime_private_header_files_dir}/*.h)
+            ${PROJECT_SOURCE_DIR}/src/rime/${rime_private_header_files_dir}/*.h)
     install(FILES ${rime_private_header_files}
-      DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}/rime/${rime_private_header_files_dir})
+            DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}/rime/${rime_private_header_files_dir})
   endforeach()
 endif()
 
@@ -274,9 +290,8 @@ if(BUILD_SHARED_LIBS AND BUILD_SEPARATE_LIBS AND rime_plugins_objs)
 endif()
 
 add_subdirectory(src)
-
+add_subdirectory(tools)
 if(BUILD_SHARED_LIBS)
-  add_subdirectory(tools)
 
   if(BUILD_TEST)
     add_subdirectory(test)
